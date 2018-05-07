@@ -1,59 +1,27 @@
 import { Injectable } from '@angular/core';
-import { IAuthorization } from '../../lib/interfaces/config.json';
-import { InAppBrowser, InAppBrowserEvent, InAppBrowserObject } from "@ionic-native/in-app-browser";
+import { InAppBrowser, InAppBrowserEvent } from "@ionic-native/in-app-browser";
 import { HttpClient, HttpHeaders, HttpParams, HttpErrorResponse } from '@angular/common/http';
-import {
-  ICredentialsLoginResponse,
-  ISession,
-  ICredentials,
-  IOIDCLoginResponse
-} from '../../lib/interfaces';
-import { WebHttpUrlEncodingCodec } from '../../lib/util';
 import { Observable } from "rxjs/Observable";
 import { Observer } from "rxjs/Observer";
 
+// TODO: Should not be necessary actually, is just a fix
+import { WebHttpUrlEncodingCodec } from '../../lib/util';
+
+/** Imports from same module */
+import {
+  ILoginProvider,
+  ICredentialsLoginResponse,
+  ISession,
+  ICredentials,
+  IOIDCLoginResponse,
+  IAction,
+  ELoginErrors,
+  ILoginRequest
+} from './interfaces';
+import { cleanCredentials, isSubset } from "./lib";
+
 // set to true to see output
 var debugMode:boolean = true;
-
-/**
- * cleans provided username. Puts it to lowercase and removes optional mail suffix.
- * It is expected that credentials given to a LoginProvider have been cleaned by
- * this method.
- * @param {ICredentials} credentials
- * @return {ICredentials} cleaned credentials
- */
-export function cleanCredentials(credentials:ICredentials):ICredentials{
-  let atChar = "@";
-
-  // only username needs cleaning, actually
-  let cleanedUsername:string = credentials.username.toLowerCase().substring(
-    0,
-    credentials.username.includes(atChar)
-      ? credentials.username.lastIndexOf(atChar)
-      : credentials.username.length
-  );
-
-  return {
-    username: cleanedUsername,
-    password: credentials.password
-  }
-}
-
-/**
- * returns whether 'subset' is a subst of 'string'. Actually just a shorter way
- * for calling '.indexOf(...) != -1'
- * @param {string} string
- * @param {string} subset
- * @returns {boolean}
- */
-function isSubset(string:string, subset:string) {
-  return string.indexOf(subset) != -1;
-}
-
-/** Defines a LoginProvider, not that much right now, but can't hurt */
-export interface ILoginProvider {
-  login(credentials:ICredentials, authConfig:IAuthorization):Observable<ISession>;
-}
 
 /**
  * Prints text only if global debug variable has been set
@@ -65,25 +33,6 @@ export function debug(text) {
   }
 }
 
-/** Errors that will be used by LoginProvider */
-export enum ELoginErrors {
-  AUTHENTICATION, TECHNICAL, NETWORK, UNKNOWN_METHOD, UNKNOWN_ERROR
-}
-
-/** Defines a LoginRequest that is given to each login method */
-export interface ILoginRequest {
-  credentials:ICredentials,
-  browser?:InAppBrowserObject,
-  loginAttemptStarted:boolean,
-  authConfig:IAuthorization
-}
-
-/** Single action that can be triggered by an SSO browser event */
-export interface IAction {
-  event: string;
-  condition(event:InAppBrowserEvent, loginRequest:ILoginRequest): boolean;
-  action(event:InAppBrowserEvent, loginRequest:ILoginRequest, observer:Observer<ISession>):void;
-}
 
 /**
  * LoginProvider
@@ -221,16 +170,18 @@ export class UPLoginProvider implements ILoginProvider {
    * performs the correct login method depending on the `method` parameter and
    * returns an Observable<ISession> containing the session.
    * @param {ICredentials} credentials
-   * @param {IAuthorization} authConfig
+   * @param {any} authConfig
    * @returns {Promise<ISession>}
    */
-  public login(credentials:ICredentials, authConfig:IAuthorization): Observable<ISession> {
+  public login(credentials:ICredentials, authConfig:any): Observable<ISession> {
 
     let loginRequest:ILoginRequest = {
       credentials: cleanCredentials(credentials),
       authConfig: authConfig,
       loginAttemptStarted: false
     };
+
+    // TODO: Check if authConfig is correct, right now it is not typed to reduce dependencies
 
     return Observable.create(
       observer => {
