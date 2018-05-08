@@ -4,10 +4,7 @@ import { HttpClient, HttpHeaders, HttpParams, HttpErrorResponse } from '@angular
 import { Observable } from "rxjs/Observable";
 import { Observer } from "rxjs/Observer";
 
-// TODO: Should not be necessary actually, is just a fix
-import { WebHttpUrlEncodingCodec } from '../../lib/util';
-
-/** Imports from same module */
+/** Imports from this module (in same directory) */
 import {
   ILoginProvider,
   ICredentialsLoginResponse,
@@ -18,7 +15,7 @@ import {
   ELoginErrors,
   ILoginRequest
 } from './interfaces';
-import { cleanCredentials, isSubset } from "./lib";
+import { WebHttpUrlEncodingCodec, cleanCredentials, isSubset } from "./lib";
 
 // set to true to see output
 var debugMode:boolean = true;
