@@ -54,3 +54,28 @@ export interface ISession {
   token: string;
   oidcTokenObject?:IOIDCLoginResponse;
 }
+
+/* config */
+
+export interface IAuthorization {
+  credentials?:IMethodCredentials;
+  sso?:IMethodSSO;
+  oidc?:IMethodOIDC;
+}
+
+export interface IMethodCredentials {
+  method:string;
+  moodleLoginEndpoint:string;
+  accessToken:string;
+  service:string;
+  moodlewsrestformat:string;
+}
+
+// TODO: add types for the rest
+export interface IMethodSSO {
+
+}
+
+export interface IMethodOIDC {
+
+}
