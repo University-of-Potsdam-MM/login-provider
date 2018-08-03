@@ -4,7 +4,7 @@ import { Observer } from "rxjs/Observer";
 
 /** Defines a LoginProvider, not that much right now, but can't hurt */
 export interface ILoginProvider {
-  login(credentials:ICredentials, authConfig:any):Observable<ISession>;
+
 }
 
 /** Errors that will be used by LoginProvider */
@@ -15,9 +15,11 @@ export enum ELoginErrors {
 /** Defines a LoginRequest that is given to each login method */
 export interface ILoginRequest {
   credentials:ICredentials,
-  browser?:InAppBrowserObject,
+  // loginConfig:ILoginConfig_SSO|ILoginConfig_OIDC|ILoginConfig_OIDC;
   loginAttemptStarted:boolean,
-  authConfig:any
+  ssoConfig?:ILoginConfig_SSO;
+  oidcConfig?:ILoginConfig_OIDC;
+  credentialsConfig?:ILoginConfig_Credentials;
 }
 
 /** Single action that can be triggered by an SSO browser event */
@@ -55,27 +57,45 @@ export interface ISession {
   oidcTokenObject?:IOIDCLoginResponse;
 }
 
-/* config */
+/* ~~~ config ~~~ */
 
-export interface IAuthorization {
-  credentials?:IMethodCredentials;
-  sso?:IMethodSSO;
-  oidc?:IMethodOIDC;
+/* SSO */
+export interface ILoginConfig_SSO {
+  browser:any;
+  method:string;
+  ssoUrls:ISSOUrls;
 }
 
-export interface IMethodCredentials {
-  method:string;
+export interface ISSOUrls {
+  loginUrl:string,
+  pluginUrl:string;
+  tokenUrl:string,
+  idpBaseUrl:string,
+  idpUrl:string,
+  attributeReleaseUrl:string;
+  pluginUrlParams:IPluginUrlParams;
+}
+
+export interface IPluginUrlParams {
+  service:string;
+  passport:string;
+}
+
+
+/* Credentials */
+export interface ILoginConfig_Credentials {
   moodleLoginEndpoint:string;
   accessToken:string;
   service:string;
   moodlewsrestformat:string;
 }
 
-// TODO: add types for the rest
-export interface IMethodSSO {
-
+/* OIDC */
+export interface ILoginConfig_OIDC {
+  tokenUrl:string;
+  accessToken:string;
+  contentType:string;
+  grantType:string;
+  scope:string;
 }
 
-export interface IMethodOIDC {
-
-}
