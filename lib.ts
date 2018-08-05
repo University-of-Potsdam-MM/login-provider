@@ -61,10 +61,8 @@ export function constructPluginUrl(pluginUrlBase, params):string {
   for (let key in params) {
     parameters.push(encodeURIComponent(key) + '=' + encodeURIComponent(params[key]));
   }
-  let pluginUrl = `${pluginUrlBase}\
-                  +${pluginUrlBase.slice(-1)=="?" ? "" : "?"}\
-                  +${parameters.join('&')}`;
+  let pluginUrl = `${pluginUrlBase}${pluginUrlBase.slice(-1)=="?" ? "" : "?"}${parameters.join('&')}`;
 
-  console.log(`[login-provider]: Created pluginUrl: ${pluginUrl}`);
+  console.log(`[LoginProvider]: Created pluginUrl: ${pluginUrl}`);
   return pluginUrl;
 }

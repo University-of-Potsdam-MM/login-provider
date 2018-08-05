@@ -15,6 +15,7 @@ export enum ELoginErrors {
 /** Defines a LoginRequest that is given to each login method */
 export interface ILoginRequest {
   credentials:ICredentials,
+  // TODO: would be nice to unify the loginConfigs somehow, like:
   // loginConfig:ILoginConfig_SSO|ILoginConfig_OIDC|ILoginConfig_OIDC;
   loginAttemptStarted:boolean,
   ssoConfig?:ILoginConfig_SSO;

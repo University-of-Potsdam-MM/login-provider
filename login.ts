@@ -1,10 +1,12 @@
+/* External dependencies */
 import { Injectable } from '@angular/core';
 import { InAppBrowser, InAppBrowserEvent } from "@ionic-native/in-app-browser";
 import { HttpClient, HttpHeaders, HttpParams, HttpErrorResponse } from '@angular/common/http';
 import { Observable } from "rxjs/Observable";
 import { Observer } from "rxjs/Observer";
+import { ReplaySubject } from "rxjs/ReplaySubject";
 
-/** Imports from this module (in same directory) */
+/* Imports from this module (in same directory) */
 import {
   ILoginProvider,
   ICredentialsLoginResponse,
@@ -20,7 +22,6 @@ import {
   isSubset,
   constructPluginUrl
 } from "./lib";
-import {ReplaySubject} from "rxjs/ReplaySubject";
 
 // set to true to see output
 var debugMode:boolean = true;
@@ -31,7 +32,7 @@ var debugMode:boolean = true;
  */
 export function debug(text) {
   if(debugMode) {
-    console.log(`[LoginProvider]: ${text}`);
+    console.log(`[LoginProvider]:${text}`);
   }
 }
 
@@ -77,20 +78,20 @@ export class UPLoginProvider implements ILoginProvider {
           let token = event.url;
           token = token.replace("http://", "");
           token = token.replace(loginRequest.ssoConfig.ssoUrls.tokenUrl, "");
-          debug(`ssoLogin: token ${token}`);
+          debug(`[ssoLogin] token ${token}`);
           try {
             token = atob(token);
 
             // Skip the passport validation, just trust the token
             token = token.split(":::")[1];
-            debug(`ssoLogin: Moodle token found: ${token}`);
+            debug(`[ssoLogin] Moodle token found: ${token}`);
 
             let session:ISession = {
               credentials:  loginRequest.credentials,
               token:        token
             };
 
-            debug("ssoLogin: Session created");
+            debug("[ssoLogin] Session created");
 
             observer.next(session);
             observer.complete();
@@ -109,14 +110,14 @@ export class UPLoginProvider implements ILoginProvider {
           !loginRequest.loginAttemptStarted
       },
       action: async (event, loginRequest, subject) => {
-        debug("ssoLogin: Testing for login form");
+        debug("[ssoLogin] Testing for login form");
 
         // Test for a login form
         let testForLoginForm = '$("form#login").length;';
         let length = await loginRequest.ssoConfig.browser.executeScript({ code: testForLoginForm });
 
         if(length[0] >= 1) {
-          debug("ssoLogin: Login form present");
+          debug("[ssoLogin] Login form present");
 
           // Create code for executing login in browser
           let enterCredentials =
@@ -126,7 +127,7 @@ export class UPLoginProvider implements ILoginProvider {
 
           loginRequest.loginAttemptStarted = true;
 
-          debug("ssoLogin: Injecting login code now");
+          debug("[ssoLogin] Injecting login code now");
           loginRequest.ssoConfig.browser.executeScript({code: enterCredentials});
         }
       }
@@ -178,8 +179,6 @@ export class UPLoginProvider implements ILoginProvider {
     }
   }
 
-
-
   /**
    * Performs a SSO login by creating an InAppBrowser object and attaching
    * listeners to it. When SSO login has been performed the given observer is
@@ -189,7 +188,7 @@ export class UPLoginProvider implements ILoginProvider {
    * @param {Observer<ISession>} observer
    */
   public ssoLogin(credentials:ICredentials, loginConfig:ILoginConfig_SSO):Observable<ISession> {
-    debug("[login-provider]: Doing ssoLogin");
+    debug("[ssoLogin] Doing ssoLogin");
 
     let loginRequest:ILoginRequest = {
       credentials:credentials,
@@ -198,7 +197,7 @@ export class UPLoginProvider implements ILoginProvider {
     };
 
     if(!loginRequest.ssoConfig.browser) {
-      debug("ssoLogin: Browser is undefined, will create one");
+      debug("[ssoLogin] Browser is undefined, will create one");
       // If no browser is given create browser object by loading URL
       loginRequest.ssoConfig.browser = this.inAppBrowser.create(
         constructPluginUrl(
@@ -209,7 +208,6 @@ export class UPLoginProvider implements ILoginProvider {
         {clearcache: "yes", clearsessioncache: "yes"}
       );
     }
-
 
     let rs = new ReplaySubject<ISession>();
 
@@ -225,7 +223,7 @@ export class UPLoginProvider implements ILoginProvider {
       }
     ).subscribe(
       session => {
-        debug("ssoLogin: Success, closing browser now");
+        debug("[ssoLogin] Success, closing browser now");
         loginRequest.ssoConfig.browser.close();
         setTimeout(
           ()=> {
@@ -234,7 +232,7 @@ export class UPLoginProvider implements ILoginProvider {
         );
       },
       error => {
-        debug("ssoLogin: Failed, closing browser now");
+        debug("[ssoLogin] Failed, closing browser now");
         loginRequest.ssoConfig.browser.close();
         setTimeout(
           ()=> {
@@ -255,7 +253,7 @@ export class UPLoginProvider implements ILoginProvider {
    * @param {Observer<ISession>} observer
    */
   public credentialsLogin(credentials:ICredentials, loginConfig:ILoginConfig_Credentials): Observable<ISession>{
-    debug("[login-provider]: Doing credentialsLogin");
+    debug("[credentialsLogin] Doing credentialsLogin");
 
     let url:string = loginConfig.moodleLoginEndpoint;
 
@@ -297,7 +295,7 @@ export class UPLoginProvider implements ILoginProvider {
    * @param {Observer<ISession>} observer
    */
   public oidcLogin(credentials:ICredentials, loginConfig:ILoginConfig_OIDC):Observable<ISession>{
-    debug("[login-provider]: Doing oidcLogin");
+    debug("[oidcLogin] Doing oidcLogin");
 
     let tokenUrl:string = loginConfig.tokenUrl;
 
