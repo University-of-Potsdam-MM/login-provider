@@ -15,8 +15,12 @@ import {
   ELoginErrors,
   ILoginRequest, ILoginConfig_SSO, ILoginConfig_OIDC, ILoginConfig_Credentials
 } from './interfaces';
-import { WebHttpUrlEncodingCodec, cleanCredentials, isSubset } from "./lib";
-import {AsyncSubject} from "rxjs/AsyncSubject";
+import {
+  WebHttpUrlEncodingCodec,
+  isSubset,
+  constructPluginUrl
+} from "./lib";
+import {ReplaySubject} from "rxjs/ReplaySubject";
 
 // set to true to see output
 var debugMode:boolean = true;
@@ -174,16 +178,7 @@ export class UPLoginProvider implements ILoginProvider {
     }
   }
 
-  private constructPluginUrl(pluginUrlBase, params):string {
 
-    let parameters = [];
-    for (let key in params) {
-      parameters.push(encodeURIComponent(key) + '=' + encodeURIComponent(params[key]));
-    }
-    let pluginUrl = pluginUrlBase + "?" + parameters.join('&');
-    console.log(`[login-provider]: Created pluginUrl ${pluginUrl}`);
-    return pluginUrl;
-  }
 
   /**
    * Performs a SSO login by creating an InAppBrowser object and attaching
@@ -206,7 +201,7 @@ export class UPLoginProvider implements ILoginProvider {
       debug("ssoLogin: Browser is undefined, will create one");
       // If no browser is given create browser object by loading URL
       loginRequest.ssoConfig.browser = this.inAppBrowser.create(
-        this.constructPluginUrl(
+        constructPluginUrl(
           loginRequest.ssoConfig.ssoUrls.pluginUrl,
           loginRequest.ssoConfig.ssoUrls.pluginUrlParams
         ),
@@ -215,40 +210,41 @@ export class UPLoginProvider implements ILoginProvider {
       );
     }
 
-    return Observable.create(
+
+    let rs = new ReplaySubject<ISession>();
+
+    Observable.create(
       observer => {
-        Observable.create(
-          observer => {
-            for(let event in this.ssoBrowserEvents) {
-              loginRequest.ssoConfig.browser.on(this.ssoBrowserEvents[event]).subscribe(
-                (event: InAppBrowserEvent) => {
-                  this.handleSsoEvent(event, loginRequest, observer)
-                }
-              );
+        for(let event in this.ssoBrowserEvents) {
+          loginRequest.ssoConfig.browser.on(this.ssoBrowserEvents[event]).subscribe(
+            (event: InAppBrowserEvent) => {
+              this.handleSsoEvent(event, loginRequest, observer);
             }
-          }
-        ).subscribe(
-          session => {
-            debug("ssoLogin: Success, closing browser now");
-            loginRequest.ssoConfig.browser.close();
-            setTimeout(
-              ()=> {
-                observer.next(session);
-              }, 2000
-            );
-          },
-          error => {
-            debug("ssoLogin: Failed, closing browser now");
-            loginRequest.ssoConfig.browser.close();
-            setTimeout(
-              ()=> {
-                observer.error(error);
-              }, 2000
-            );
-          }
+          );
+        }
+      }
+    ).subscribe(
+      session => {
+        debug("ssoLogin: Success, closing browser now");
+        loginRequest.ssoConfig.browser.close();
+        setTimeout(
+          ()=> {
+            rs.next(session);
+          }, 2000
+        );
+      },
+      error => {
+        debug("ssoLogin: Failed, closing browser now");
+        loginRequest.ssoConfig.browser.close();
+        setTimeout(
+          ()=> {
+            rs.error(error);
+          }, 2000
         );
       }
-    )
+    );
+
+    return rs;
   }
 
   /**
@@ -272,28 +268,27 @@ export class UPLoginProvider implements ILoginProvider {
       .append("service",            loginConfig.service)
       .append("moodlewsrestformat", loginConfig.moodlewsrestformat);
 
-    return Observable.create(
-      observer => {
-        this.http.get(url, {headers: headers, params: params}).subscribe(
-          (response:ICredentialsLoginResponse) => {
-            if(response.token) {
-              observer.next({
-                credentials:  credentials,
-                token:        response.token
-              });
-              observer.complete();
-            } else {
-              observer.error({reason: ELoginErrors.AUTHENTICATION});
-            }
-          },
-          (error:HttpErrorResponse) => {
-            // some other error
-            observer.error({reason: ELoginErrors.UNKNOWN_ERROR, error: error});
-          }
-        );
-      }
-    )
+    let rs = new ReplaySubject<ISession>();
 
+    this.http.get(url, {headers: headers, params: params}).subscribe(
+      (response:ICredentialsLoginResponse) => {
+        if(response.token) {
+          rs.next({
+            credentials:  credentials,
+            token:        response.token
+          });
+          rs.complete();
+        } else {
+          rs.error({reason: ELoginErrors.AUTHENTICATION});
+        }
+      },
+      (error:HttpErrorResponse) => {
+        // some other error
+        rs.error({reason: ELoginErrors.UNKNOWN_ERROR, error: error});
+      }
+    );
+
+    return rs;
   }
 
   /**
@@ -316,29 +311,30 @@ export class UPLoginProvider implements ILoginProvider {
       .append("password",         credentials.password)
       .append("scope",            loginConfig.scope);
 
-    return Observable.create(
-      observer => {
-        this.http.post(tokenUrl, params, {headers: headers}).subscribe(
-          (response:IOIDCLoginResponse) => {
-            // create session object with access_token as token, but also attach
-            // the whole response in case it's needed
-            observer.next({
-              credentials:      credentials,
-              token:            response.access_token,
-              oidcTokenObject:  response
-            });
-            observer.complete();
-          },
-          (error) => {
-            // Authentication error
-            // TODO: Add typing for errors?
-            if(error.status = 401) {
-              observer.error({reason: ELoginErrors.AUTHENTICATION});
-            }
-          }
-        );
+
+    let rs = new ReplaySubject<ISession>();
+
+    this.http.post(tokenUrl, params, {headers: headers}).subscribe(
+      (response:IOIDCLoginResponse) => {
+        // create session object with access_token as token, but also attach
+        // the whole response in case it's needed
+        rs.next({
+          credentials:      credentials,
+          token:            response.access_token,
+          oidcTokenObject:  response
+        });
+        rs.complete();
+      },
+      (error) => {
+        // Authentication error
+        // TODO: Add typing for errors?
+        if(error.status = 401) {
+          rs.error({reason: ELoginErrors.AUTHENTICATION});
+        }
       }
     );
+
+    return rs;
   }
 
   /**

@@ -48,3 +48,23 @@ export class WebHttpUrlEncodingCodec implements HttpParameterCodec {
   decodeKey(k: string): string { return decodeURIComponent(k); }
   decodeValue(v: string) { return decodeURIComponent(v); }
 }
+
+/**
+ * constructs and returns an URL by adding base and parameters together
+ * @param pluginUrlBase
+ * @param params
+ * @returns {string}
+ */
+export function constructPluginUrl(pluginUrlBase, params):string {
+
+  let parameters = [];
+  for (let key in params) {
+    parameters.push(encodeURIComponent(key) + '=' + encodeURIComponent(params[key]));
+  }
+  let pluginUrl = `${pluginUrlBase}\
+                  +${pluginUrlBase.slice(-1)=="?" ? "" : "?"}\
+                  +${parameters.join('&')}`;
+
+  console.log(`[login-provider]: Created pluginUrl: ${pluginUrl}`);
+  return pluginUrl;
+}
