@@ -1,4 +1,3 @@
-import { Observable } from "rxjs/Observable";
 import { InAppBrowserEvent, InAppBrowserObject } from "@ionic-native/in-app-browser";
 import { Observer } from "rxjs/Observer";
 
@@ -62,7 +61,7 @@ export interface ISession {
 
 /* SSO */
 export interface ILoginConfig_SSO {
-  browser:any;
+  browser:InAppBrowserObject;
   method:string;
   ssoUrls:ISSOUrls;
 }
