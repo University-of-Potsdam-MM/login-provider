@@ -81,13 +81,16 @@ export interface IPluginUrlParams {
   passport:string;
 }
 
+export interface AccessToken {
+  accessToken:string;
+}
 
 /* Credentials */
 export interface ILoginConfig_Credentials {
   moodleLoginEndpoint:string;
-  accessToken:string;
-  service:string;
   moodlewsrestformat:string;
+  service:string;
+  authHeader:AccessToken;
 }
 
 /* OIDC */

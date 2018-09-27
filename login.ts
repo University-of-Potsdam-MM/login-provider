@@ -258,7 +258,7 @@ export class UPLoginProvider implements ILoginProvider {
     let url:string = loginConfig.moodleLoginEndpoint;
 
     let headers:HttpHeaders = new HttpHeaders()
-      .append("Authorization",       loginConfig.accessToken);
+      .append("Authorization",       loginConfig.authHeader.accessToken);
 
     let params:HttpParams = new HttpParams({encoder: new WebHttpUrlEncodingCodec()})
       .append("username",           credentials.username)
