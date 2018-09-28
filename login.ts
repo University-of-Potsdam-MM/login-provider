@@ -272,7 +272,6 @@ export class UPLoginProvider implements ILoginProvider {
       (response:ICredentialsLoginResponse) => {
         if(response.token) {
           rs.next({
-            credentials:  credentials,
             token:        response.token
           });
           rs.complete();
@@ -317,9 +316,7 @@ export class UPLoginProvider implements ILoginProvider {
         // create session object with access_token as token, but also attach
         // the whole response in case it's needed
         rs.next({
-          credentials:      credentials,
-          token:            response.access_token,
-          oidcTokenObject:  response
+          token:            response.access_token
         });
         rs.complete();
       },

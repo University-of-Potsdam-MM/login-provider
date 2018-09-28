@@ -52,8 +52,8 @@ export interface ICredentials {
 
 /** Interface for the session to be saved in storage */
 export interface ISession {
-  credentials:ICredentials;
   token: string;
+  credentials?:ICredentials;
   oidcTokenObject?:IOIDCLoginResponse;
 }
 
