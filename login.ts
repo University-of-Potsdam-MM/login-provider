@@ -15,7 +15,11 @@ import {
   IOIDCLoginResponse,
   IAction,
   ELoginErrors,
-  ILoginRequest, ILoginConfig_SSO, ILoginConfig_OIDC, ILoginConfig_Credentials
+  ILoginRequest,
+  ILoginConfig_SSO,
+  ILoginConfig_OIDC,
+  ILoginConfig_Credentials,
+  IOIDCRefreshResponseObject
 } from './interfaces';
 import {
   WebHttpUrlEncodingCodec,
@@ -88,7 +92,8 @@ export class UPLoginProvider implements ILoginProvider {
 
             let session:ISession = {
               credentials:  loginRequest.credentials,
-              token:        token
+              token:        token,
+              timestamp:    new Date()
             };
 
             debug("[ssoLogin] Session created");
@@ -273,7 +278,8 @@ export class UPLoginProvider implements ILoginProvider {
         if(response.token) {
           rs.next({
             credentials:  credentials,
-            token:        response.token
+            token:        response.token,
+            timestamp:    new Date()
           });
           rs.complete();
         } else {
@@ -304,7 +310,7 @@ export class UPLoginProvider implements ILoginProvider {
       .append("Content-Type",     loginConfig.contentType);
 
     let params:HttpParams = new HttpParams({encoder: new WebHttpUrlEncodingCodec()})
-      .append("grant_type",       loginConfig.grantType)
+      .append("grant_type",       loginConfig.grantType_password)
       .append("username",         credentials.username)
       .append("password",         credentials.password)
       .append("scope",            loginConfig.scope);
@@ -319,13 +325,52 @@ export class UPLoginProvider implements ILoginProvider {
         rs.next({
           credentials:      credentials,
           token:            response.access_token,
-          oidcTokenObject:  response
+          oidcTokenObject:  response,
+          timestamp:        new Date()
         });
         rs.complete();
       },
       (error) => {
         // Authentication error
         // TODO: Add typing for errors?
+        if(error.status = 401) {
+          rs.error({reason: ELoginErrors.AUTHENTICATION});
+        }
+      }
+    );
+
+    return rs;
+  }
+
+  public oidcRefreshToken(refreshToken:string,
+                          loginConfig:ILoginConfig_OIDC):Observable<IOIDCRefreshResponseObject>{
+    debug("[oidcLogin] Doing oidc token refresh");
+
+    let tokenUrl:string = loginConfig.tokenUrl;
+
+    let headers:HttpHeaders = new HttpHeaders()
+      .append("Authorization",    loginConfig.accessToken)
+      .append("Content-Type",     loginConfig.contentType);
+
+    let params:HttpParams = new HttpParams({encoder: new WebHttpUrlEncodingCodec()})
+      .append("grant_type",       loginConfig.grantType_refresh)
+      .append("refresh_token",    refreshToken);
+
+
+    let rs = new ReplaySubject<IOIDCRefreshResponseObject>();
+
+    this.http.post(tokenUrl, params, {headers: headers}).subscribe(
+      (response:IOIDCLoginResponse) => {
+        // create session object with access_token as token, but also attach
+        // the whole response in case it's needed
+        rs.next({
+          oidcTokenObject:  response,
+          timestamp:        new Date()
+        });
+        rs.complete();
+      },
+      (error) => {
+        // Authentication error
         if(error.status = 401) {
           rs.error({reason: ELoginErrors.AUTHENTICATION});
         }
