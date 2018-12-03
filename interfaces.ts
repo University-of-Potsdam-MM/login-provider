@@ -39,7 +39,7 @@ export interface IOIDCLoginResponse {
   access_token: string;
   refresh_token: string;
   scope: string;
-  id_token: string;
+  id_token?: string;
   token_type: number;
   expires_in: number;
 }
@@ -54,7 +54,13 @@ export interface ICredentials {
 export interface ISession {
   credentials:ICredentials;
   token: string;
+  timestamp?:Date;
   oidcTokenObject?:IOIDCLoginResponse;
+}
+
+export interface IOIDCRefreshResponseObject {
+  timestamp:Date;
+  oidcTokenObject:IOIDCLoginResponse;
 }
 
 /* ~~~ config ~~~ */
@@ -95,7 +101,8 @@ export interface ILoginConfig_OIDC {
   tokenUrl:string;
   accessToken:string;
   contentType:string;
-  grantType:string;
+  grantType_password:string;
+  grantType_refresh:string;
   scope:string;
 }
 
