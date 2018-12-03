@@ -54,7 +54,7 @@ export interface ICredentials {
 export interface ISession {
   credentials:ICredentials;
   token: string;
-  timestamp:Date;
+  timestamp?:Date;
   oidcTokenObject?:IOIDCLoginResponse;
 }
 
