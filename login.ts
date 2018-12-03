@@ -380,6 +380,37 @@ export class UPLoginProvider implements ILoginProvider {
     return rs;
   }
 
+  public oidcGetUserInformation(loginConfig:ILoginConfig_OIDC, accessToken):IUserInformation{
+    debug("[oidcLogin] Doing oidc token refresh");
+
+    let infoUrl:string = loginConfig.tokenUrl;
+
+    let headers:HttpHeaders = new HttpHeaders()
+      .append("Authorization",    loginConfig.accessToken);
+
+    let rs = new ReplaySubject<IOIDCRefreshResponseObject>();
+
+    this.http.get(infoUrl, {headers: headers}).subscribe(
+      (response:IOIDCLoginResponse) => {
+        // create session object with access_token as token, but also attach
+        // the whole response in case it's needed
+        rs.next({
+          oidcTokenObject:  response,
+          timestamp:        new Date()
+        });
+        rs.complete();
+      },
+      (error) => {
+        // Authentication error
+        if(error.status = 401) {
+          rs.error({reason: ELoginErrors.AUTHENTICATION});
+        }
+      }
+    );
+
+    return rs;
+  }
+
   /**
    * Allows adding custom sso actions from outside
    * @param {IAction} ssoAction
