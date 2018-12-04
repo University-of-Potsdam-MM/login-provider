@@ -342,6 +342,12 @@ export class UPLoginProvider implements ILoginProvider {
     return rs;
   }
 
+  /**
+   * refreshes OIDC token with refreshToken and the loginConfig. Returns an object
+   * containing new OIDC-Response-Object and a timestamp.
+   * @param refreshToken
+   * @param loginConfig
+   */
   public oidcRefreshToken(refreshToken:string,
                           loginConfig:ILoginConfig_OIDC):Observable<IOIDCRefreshResponseObject>{
     debug("[oidcLogin] Doing oidc token refresh");
@@ -356,7 +362,6 @@ export class UPLoginProvider implements ILoginProvider {
       .append("grant_type",       loginConfig.grantType_refresh)
       .append("refresh_token",    refreshToken);
 
-
     let rs = new ReplaySubject<IOIDCRefreshResponseObject>();
 
     this.http.post(tokenUrl, params, {headers: headers}).subscribe(
@@ -370,6 +375,7 @@ export class UPLoginProvider implements ILoginProvider {
         rs.complete();
       },
       (error) => {
+        console.log(error)
         // Authentication error
         if(error.status = 401) {
           rs.error({reason: ELoginErrors.AUTHENTICATION});
