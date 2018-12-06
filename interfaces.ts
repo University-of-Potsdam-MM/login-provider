@@ -44,6 +44,18 @@ export interface IOIDCLoginResponse {
   expires_in: number;
 }
 
+
+/** Server response for OIDC user information */
+export interface IOIDCUserInformationResponse {
+  sub:string;
+  name:string;
+  given_name:string;
+  family_name:string;
+  email:string;
+}
+
+
+
 /** Credentials used for logging in */
 export interface ICredentials {
   username: string;
@@ -99,6 +111,7 @@ export interface ILoginConfig_Credentials {
 /* OIDC */
 export interface ILoginConfig_OIDC {
   tokenUrl:string;
+  userInformationUrl:string;
   accessToken:string;
   contentType:string;
   grantType_password:string;

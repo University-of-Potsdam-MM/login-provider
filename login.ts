@@ -19,7 +19,7 @@ import {
   ILoginConfig_SSO,
   ILoginConfig_OIDC,
   ILoginConfig_Credentials,
-  IOIDCRefreshResponseObject
+  IOIDCRefreshResponseObject, IOIDCUserInformationResponse
 } from './interfaces';
 import {
   WebHttpUrlEncodingCodec,
@@ -376,6 +376,39 @@ export class UPLoginProvider implements ILoginProvider {
       },
       (error) => {
         console.log(error)
+        // Authentication error
+        if(error.status = 401) {
+          rs.error({reason: ELoginErrors.AUTHENTICATION});
+        }
+      }
+    );
+
+    return rs;
+  }
+
+  /**
+   * returns information about user via OIDC
+   * @param userToken
+   * @param loginConfig
+   */
+  public oidcGetUSerInformation(session:ISession,
+                                loginConfig:ILoginConfig_OIDC):Observable<IOIDCUserInformationResponse>{
+    debug("[oidcLogin] Retrieving OIDC user information");
+
+    let userInfoUrl:string = loginConfig.userInformationUrl;
+
+    let headers:HttpHeaders = new HttpHeaders()
+      .append("Authorization",    `${session.oidcTokenObject.token_type} ${session.oidcTokenObject.access_token}`);
+
+    let rs = new ReplaySubject<IOIDCUserInformationResponse>();
+
+    this.http.post(userInfoUrl, {headers: headers}).subscribe(
+      (response:IOIDCUserInformationResponse) => {
+        rs.next(response);
+        rs.complete();
+      },
+      (error) => {
+        console.log(error);
         // Authentication error
         if(error.status = 401) {
           rs.error({reason: ELoginErrors.AUTHENTICATION});
