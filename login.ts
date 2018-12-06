@@ -402,12 +402,12 @@ export class UPLoginProvider implements ILoginProvider {
 
     let rs = new ReplaySubject<IOIDCUserInformationResponse>();
 
-    this.http.post(userInfoUrl, {headers: headers}).subscribe(
+    this.http.get(userInfoUrl, {headers: headers}).subscribe(
       (response:IOIDCUserInformationResponse) => {
         rs.next(response);
         rs.complete();
       },
-      (error) => {
+      error => {
         console.log(error);
         // Authentication error
         if(error.status = 401) {
