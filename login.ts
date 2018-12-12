@@ -402,7 +402,7 @@ export class UPLoginProvider implements ILoginProvider {
 
     let rs = new ReplaySubject<IOIDCUserInformationResponse>();
 
-    this.http.get(userInfoUrl, {headers: headers}).subscribe(
+    this.http.get(userInfoUrl, {headers: headers, params:{schema:loginConfig.userInfoParams.schema}}).subscribe(
       (response:IOIDCUserInformationResponse) => {
         rs.next(response);
         rs.complete();

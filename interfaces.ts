@@ -117,5 +117,10 @@ export interface ILoginConfig_OIDC {
   grantType_password:string;
   grantType_refresh:string;
   scope:string;
+  userInfoParams:IUserInfoParams;
+}
+
+export interface IUserInfoParams {
+  schema:string;
 }
 
