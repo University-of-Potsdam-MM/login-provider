@@ -40,7 +40,7 @@ export interface IOIDCLoginResponse {
   refresh_token: string;
   scope: string;
   id_token?: string;
-  token_type: number;
+  token_type: string;
   expires_in: number;
 }
 
