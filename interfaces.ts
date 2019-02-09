@@ -1,4 +1,4 @@
-import { InAppBrowserEvent, InAppBrowserObject } from "@ionic-native/in-app-browser";
+import { InAppBrowserEvent, InAppBrowserObject } from "@ionic-native/in-app-browser/ngx";
 import { Observer } from "rxjs/Observer";
 
 /** Defines a LoginProvider, not that much right now, but can't hurt */
