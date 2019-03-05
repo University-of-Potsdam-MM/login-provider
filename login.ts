@@ -1,6 +1,6 @@
 /* External dependencies */
 import { Injectable } from '@angular/core';
-import { InAppBrowser, InAppBrowserEvent } from '@ionic-native/in-app-browser/ngx';
+import { InAppBrowser, InAppBrowserEvent } from '@ionic-native/in-app-browser';
 import { HttpClient, HttpHeaders, HttpParams, HttpErrorResponse } from '@angular/common/http';
 import { Observable } from 'rxjs/Observable';
 import { Observer } from 'rxjs/Observer';
