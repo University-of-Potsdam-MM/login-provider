@@ -1,7 +1,8 @@
-import { InAppBrowserEvent, InAppBrowserObject } from "@ionic-native/in-app-browser";
-import { Observer } from "rxjs/Observer";
+import { InAppBrowserEvent, InAppBrowserObject } from '@ionic-native/in-app-browser/ngx';
+import { Observer } from 'rxjs/Observer';
 
 /** Defines a LoginProvider, not that much right now, but can't hurt */
+// tslint:disable-next-line: no-empty-interface
 export interface ILoginProvider {
 
 }
@@ -13,25 +14,25 @@ export enum ELoginErrors {
 
 /** Defines a LoginRequest that is given to each login method */
 export interface ILoginRequest {
-  credentials:ICredentials,
+  credentials: ICredentials;
   // TODO: would be nice to unify the loginConfigs somehow, like:
   // loginConfig:ILoginConfig_SSO|ILoginConfig_OIDC|ILoginConfig_OIDC;
-  loginAttemptStarted:boolean,
-  ssoConfig?:ILoginConfig_SSO;
-  oidcConfig?:ILoginConfig_OIDC;
-  credentialsConfig?:ILoginConfig_Credentials;
+  loginAttemptStarted: boolean;
+  ssoConfig?: ILoginConfig_SSO;
+  oidcConfig?: ILoginConfig_OIDC;
+  credentialsConfig?: ILoginConfig_Credentials;
 }
 
 /** Single action that can be triggered by an SSO browser event */
 export interface IAction {
   event: string;
-  condition(event:InAppBrowserEvent, loginRequest:ILoginRequest): boolean;
-  action(event:InAppBrowserEvent, loginRequest:ILoginRequest, observer:Observer<ISession>):void;
+  condition(event: InAppBrowserEvent, loginRequest: ILoginRequest): boolean;
+  action(event: InAppBrowserEvent, loginRequest: ILoginRequest, observer: Observer<ISession>): void;
 }
 
 /** Server response for ordinary credentials login */
 export interface ICredentialsLoginResponse {
-  token?:string;
+  token?: string;
 }
 
 /** Server response for OIDC login */
@@ -47,11 +48,11 @@ export interface IOIDCLoginResponse {
 
 /** Server response for OIDC user information */
 export interface IOIDCUserInformationResponse {
-  sub:string;
-  name:string;
-  given_name:string;
-  family_name:string;
-  email:string;
+  sub: string;
+  name: string;
+  given_name: string;
+  family_name: string;
+  email: string;
 }
 
 
@@ -64,63 +65,66 @@ export interface ICredentials {
 
 /** Interface for the session to be saved in storage */
 export interface ISession {
-  credentials:ICredentials;
+  credentials: ICredentials;
   token: string;
-  timestamp?:Date;
-  oidcTokenObject?:IOIDCLoginResponse;
+  timestamp?: Date;
+  oidcTokenObject?: IOIDCLoginResponse;
 }
 
 export interface IOIDCRefreshResponseObject {
-  timestamp:Date;
-  oidcTokenObject:IOIDCLoginResponse;
+  timestamp: Date;
+  oidcTokenObject: IOIDCLoginResponse;
 }
 
 /* ~~~ config ~~~ */
 
 /* SSO */
+// tslint:disable-next-line: class-name
 export interface ILoginConfig_SSO {
-  browser:InAppBrowserObject;
-  method:string;
-  ssoUrls:ISSOUrls;
+  browser: InAppBrowserObject;
+  method: string;
+  ssoUrls: ISSOUrls;
 }
 
 export interface ISSOUrls {
-  loginUrl:string,
-  pluginUrl:string;
-  tokenUrl:string,
-  idpBaseUrl:string,
-  idpUrl:string,
-  attributeReleaseUrl:string;
-  pluginUrlParams:IPluginUrlParams;
+  loginUrl: string;
+  pluginUrl: string;
+  tokenUrl: string;
+  idpBaseUrl: string;
+  idpUrl: string;
+  attributeReleaseUrl: string;
+  pluginUrlParams: IPluginUrlParams;
 }
 
 export interface IPluginUrlParams {
-  service:string;
-  passport:string;
+  service: string;
+  passport: string;
 }
 
 
 /* Credentials */
+// tslint:disable-next-line: class-name
 export interface ILoginConfig_Credentials {
-  moodleLoginEndpoint:string;
-  accessToken:string;
-  service:string;
-  moodlewsrestformat:string;
+  moodleLoginEndpoint: string;
+  accessToken: string;
+  service: string;
+  moodlewsrestformat: string;
 }
 
 /* OIDC */
+// tslint:disable-next-line: class-name
 export interface ILoginConfig_OIDC {
-  tokenUrl:string;
-  userInformationUrl:string;
-  accessToken:string;
-  contentType:string;
-  grantType_password:string;
-  grantType_refresh:string;
-  scope:string;
-  userInfoParams:IUserInfoParams;
+  tokenUrl: string;
+  userInformationUrl: string;
+  accessToken: string;
+  contentType: string;
+  grantType_password: string;
+  grantType_refresh: string;
+  scope: string;
+  userInfoParams: IUserInfoParams;
 }
 
 export interface IUserInfoParams {
-  schema:string;
+  schema: string;
 }
 
