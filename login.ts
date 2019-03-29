@@ -376,11 +376,17 @@ export class UPLoginProvider implements ILoginProvider {
         });
         rs.complete();
       },
-      (error) => {
-        console.log(error);
+      (response) => {
+        console.log(response);
         // Authentication error
-        if (error.status = 401) {
-          rs.error({reason: ELoginErrors.AUTHENTICATION});
+        if (response.status = 401) {
+          let errorDescription, error;
+          if (response.error && response.error.error_description && response.error.error) {
+            errorDescription = response.error.error_description;
+            error = response.error.error;
+          }
+
+          rs.error({ reason: ELoginErrors.AUTHENTICATION, error: error, description: errorDescription });
         }
       }
     );
