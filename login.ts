@@ -1,10 +1,8 @@
 /* External dependencies */
 import { Injectable } from '@angular/core';
-import { InAppBrowser, InAppBrowserEvent } from "@ionic-native/in-app-browser";
 import { HttpClient, HttpHeaders, HttpParams, HttpErrorResponse } from '@angular/common/http';
-import { Observable } from "rxjs/Observable";
-import { Observer } from "rxjs/Observer";
-import { ReplaySubject } from "rxjs/ReplaySubject";
+import { Observer, Observable, ReplaySubject } from 'rxjs';
+import { InAppBrowser } from '@ionic-native/in-app-browser/ngx';
 
 /* Imports from this module (in same directory) */
 import {
@@ -21,17 +19,17 @@ import {
   WebHttpUrlEncodingCodec,
   isSubset,
   constructPluginUrl
-} from "./lib";
+} from './lib';
 
 // set to true to see output
-var debugMode:boolean = true;
+const debugMode = true;
 
 /**
  * Prints text only if global debug variable has been set
  * @param text
  */
 export function debug(text) {
-  if(debugMode) {
+  if (debugMode) {
     console.log(`[LoginProvider]:${text}`);
   }
 }
@@ -56,42 +54,42 @@ export class UPLoginProvider implements ILoginProvider {
 
   // events that can occur in InAppBrowser during SSO login
   private ssoBrowserEvents = {
-    loadStart:  "loadstart",
-    loadStop:   "loadstop",
-    loadError:  "loaderror",
-    exit:       "exit"
+    loadStart:  'loadstart',
+    loadStop:   'loadstop',
+    loadError:  'loaderror',
+    exit:       'exit'
   };
 
   // predefined actions that will be used
-  private ssoActions:IAction[] = [
+  private ssoActions: IAction[] = [
     {
       // obtains token from URL
       event: this.ssoBrowserEvents.loadStart,
       condition: (event, loginRequest) => {
         return isSubset(event.url, loginRequest.ssoConfig.ssoUrls.tokenUrl) ||
-          isSubset(event.url, ("http://" + loginRequest.ssoConfig.ssoUrls.tokenUrl))
+          isSubset(event.url, ('http://' + loginRequest.ssoConfig.ssoUrls.tokenUrl));
       },
       action: (event, loginRequest, observer) => {
-        if(isSubset(event.url, loginRequest.ssoConfig.ssoUrls.tokenUrl) ||
-          isSubset(event.url, ("http://" + loginRequest.ssoConfig.ssoUrls.tokenUrl))) {
+        if (isSubset(event.url, loginRequest.ssoConfig.ssoUrls.tokenUrl) ||
+          isSubset(event.url, ('http://' + loginRequest.ssoConfig.ssoUrls.tokenUrl))) {
 
           let token = event.url;
-          token = token.replace("http://", "");
-          token = token.replace(loginRequest.ssoConfig.ssoUrls.tokenUrl, "");
+          token = token.replace('http://', '');
+          token = token.replace(loginRequest.ssoConfig.ssoUrls.tokenUrl, '');
           debug(`[ssoLogin] token ${token}`);
           try {
             token = atob(token);
 
             // Skip the passport validation, just trust the token
-            token = token.split(":::")[1];
+            token = token.split(':::')[1];
             debug(`[ssoLogin] Moodle token found: ${token}`);
 
-            let session:ISession = {
+            const session: ISession = {
               credentials:  loginRequest.credentials,
               token:        token
             };
 
-            debug("[ssoLogin] Session created");
+            debug('[ssoLogin] Session created');
 
             observer.next(session);
             observer.complete();
@@ -107,27 +105,27 @@ export class UPLoginProvider implements ILoginProvider {
       event: this.ssoBrowserEvents.loadStop,
       condition: (event, loginRequest) => {
         return isSubset(event.url, loginRequest.ssoConfig.ssoUrls.idpBaseUrl) &&
-          !loginRequest.loginAttemptStarted
+          !loginRequest.loginAttemptStarted;
       },
       action: async (event, loginRequest, subject) => {
-        debug("[ssoLogin] Testing for login form");
+        debug('[ssoLogin] Testing for login form');
 
         // Test for a login form
-        let testForLoginForm = '$("form#login").length;';
-        let length = await loginRequest.ssoConfig.browser.executeScript({ code: testForLoginForm });
+        const testForLoginForm = '$("form#login").length;';
+        const length = await loginRequest.ssoConfig.browser.executeScript({ code: testForLoginForm });
 
-        if(length[0] >= 1) {
-          debug("[ssoLogin] Login form present");
+        if (length[0] >= 1) {
+          debug('[ssoLogin] Login form present');
 
           // Create code for executing login in browser
-          let enterCredentials =
+          const enterCredentials =
             `$("form#login #username").val(\'${loginRequest.credentials.username}\');
              $("form#login #password").val(\'${loginRequest.credentials.password}\');
              $("form#login .loginbutton").click();`;
 
           loginRequest.loginAttemptStarted = true;
 
-          debug("[ssoLogin] Injecting login code now");
+          debug('[ssoLogin] Injecting login code now');
           loginRequest.ssoConfig.browser.executeScript({code: enterCredentials});
         }
       }
@@ -135,7 +133,7 @@ export class UPLoginProvider implements ILoginProvider {
     {
       //
       event: this.ssoBrowserEvents.loadError,
-      condition: (event, loginRequest) => { return true },
+      condition: (event, loginRequest) => true,
       action: (event, loginRequest, observer) => {
         // TODO: something should be done here, I guess
       }
@@ -143,11 +141,11 @@ export class UPLoginProvider implements ILoginProvider {
     {
       // happens when user closes browser
       event: this.ssoBrowserEvents.exit,
-      condition: () => { return true },
+      condition: () => true,
       action: (event, loginRequest, observer) => {
         observer.error({
           reason: ELoginErrors.TECHNICAL,
-          description: "User closed browser"
+          description: 'User closed browser'
         });
       }
     }
@@ -156,7 +154,7 @@ export class UPLoginProvider implements ILoginProvider {
   constructor(
       public http: HttpClient,
       public inAppBrowser: InAppBrowser) {
-  };
+  }
 
   /**
    * Handles ssoBrowserEvents by executing defined actions if event type matches
@@ -166,14 +164,14 @@ export class UPLoginProvider implements ILoginProvider {
    * @param {ILoginRequest} loginRequest
    * @param {Observer<ISession>} observer
    */
-  private handleSsoEvent(event:InAppBrowserEvent,
-                         loginRequest:ILoginRequest,
-                         observer:Observer<ISession>) {
+  private handleSsoEvent(event: InAppBrowserEvent,
+                         loginRequest: ILoginRequest,
+                         observer: Observer<ISession>) {
 
     // test all defined ssoActions
-    for(let ssoAction of this.ssoActions) {
+    for (const ssoAction of this.ssoActions) {
       // execute action if event type matches and condition functions returns true
-      if (ssoAction.event == event.type && ssoAction.condition(event, loginRequest)) {
+      if (ssoAction.event === event.type && ssoAction.condition(event, loginRequest)) {
         ssoAction.action(event, loginRequest, observer);
       }
     }
@@ -187,55 +185,58 @@ export class UPLoginProvider implements ILoginProvider {
    * @param {ILoginRequest} loginRequest
    * @param {Observer<ISession>} observer
    */
-  public ssoLogin(credentials:ICredentials, loginConfig:ILoginConfig_SSO):Observable<ISession> {
-    debug("[ssoLogin] Doing ssoLogin");
+  public ssoLogin(credentials: ICredentials, loginConfig: ILoginConfig_SSO): Observable<ISession> {
+    debug('[ssoLogin] Doing ssoLogin');
 
-    let loginRequest:ILoginRequest = {
-      credentials:credentials,
-      ssoConfig:loginConfig,
+    const loginRequest: ILoginRequest = {
+      credentials: credentials,
+      ssoConfig: loginConfig,
       loginAttemptStarted: false
     };
 
-    if(!loginRequest.ssoConfig.browser) {
-      debug("[ssoLogin] Browser is undefined, will create one");
+    if (!loginRequest.ssoConfig.browser) {
+      debug('[ssoLogin] Browser is undefined, will create one');
       // If no browser is given create browser object by loading URL
       loginRequest.ssoConfig.browser = this.inAppBrowser.create(
         constructPluginUrl(
           loginRequest.ssoConfig.ssoUrls.pluginUrl,
           loginRequest.ssoConfig.ssoUrls.pluginUrlParams
         ),
-        "_blank",
-        {clearcache: "yes", clearsessioncache: "yes"}
+        '_blank',
+        {clearcache: 'yes', clearsessioncache: 'yes'}
       );
     }
 
-    let rs = new ReplaySubject<ISession>();
+    const rs = new ReplaySubject<ISession>();
 
+    // tslint:disable-next-line: deprecation
     Observable.create(
       observer => {
-        for(let event in this.ssoBrowserEvents) {
-          loginRequest.ssoConfig.browser.on(this.ssoBrowserEvents[event]).subscribe(
-            (event: InAppBrowserEvent) => {
-              this.handleSsoEvent(event, loginRequest, observer);
-            }
-          );
+        for (const event in this.ssoBrowserEvents) {
+          if (this.ssoBrowserEvents.hasOwnProperty(event)) {
+            loginRequest.ssoConfig.browser.on(this.ssoBrowserEvents[event]).subscribe(
+              (eventRes: InAppBrowserEvent) => {
+                this.handleSsoEvent(eventRes, loginRequest, observer);
+              }
+            );
+          }
         }
       }
     ).subscribe(
       session => {
-        debug("[ssoLogin] Success, closing browser now");
+        debug('[ssoLogin] Success, closing browser now');
         loginRequest.ssoConfig.browser.close();
         setTimeout(
-          ()=> {
+          () => {
             rs.next(session);
           }, 2000
         );
       },
       error => {
-        debug("[ssoLogin] Failed, closing browser now");
+        debug('[ssoLogin] Failed, closing browser now');
         loginRequest.ssoConfig.browser.close();
         setTimeout(
-          ()=> {
+          () => {
             rs.error(error);
           }, 2000
         );
@@ -252,25 +253,25 @@ export class UPLoginProvider implements ILoginProvider {
    * @param {ILoginRequest} loginRequest
    * @param {Observer<ISession>} observer
    */
-  public credentialsLogin(credentials:ICredentials, loginConfig:ILoginConfig_Credentials): Observable<ISession>{
-    debug("[credentialsLogin] Doing credentialsLogin");
+  public credentialsLogin(credentials: ICredentials, loginConfig: ILoginConfig_Credentials): Observable<ISession> {
+    debug('[credentialsLogin] Doing credentialsLogin');
 
-    let url:string = loginConfig.moodleLoginEndpoint;
+    const url: string = loginConfig.moodleLoginEndpoint;
 
-    let headers:HttpHeaders = new HttpHeaders()
-      .append("Authorization",       loginConfig.authHeader.accessToken);
+    const headers: HttpHeaders = new HttpHeaders()
+      .append('Authorization',       loginConfig.authHeader.accessToken);
 
-    let params:HttpParams = new HttpParams({encoder: new WebHttpUrlEncodingCodec()})
-      .append("username",           credentials.username)
-      .append("password",           credentials.password)
-      .append("service",            loginConfig.service)
-      .append("moodlewsrestformat", loginConfig.moodlewsrestformat);
+    const params: HttpParams = new HttpParams({encoder: new WebHttpUrlEncodingCodec()})
+      .append('username',           credentials.username)
+      .append('password',           credentials.password)
+      .append('service',            loginConfig.service)
+      .append('moodlewsrestformat', loginConfig.moodlewsrestformat);
 
-    let rs = new ReplaySubject<ISession>();
+    const rs = new ReplaySubject<ISession>();
 
     this.http.get(url, {headers: headers, params: params}).subscribe(
-      (response:ICredentialsLoginResponse) => {
-        if(response.token) {
+      (response: ICredentialsLoginResponse) => {
+        if (response.token) {
           rs.next({
             token:        response.token
           });
@@ -279,7 +280,7 @@ export class UPLoginProvider implements ILoginProvider {
           rs.error({reason: ELoginErrors.AUTHENTICATION});
         }
       },
-      (error:HttpErrorResponse) => {
+      (error: HttpErrorResponse) => {
         // some other error
         rs.error({reason: ELoginErrors.UNKNOWN_ERROR, error: error});
       }
@@ -293,26 +294,26 @@ export class UPLoginProvider implements ILoginProvider {
    * @param {ILoginRequest} loginRequest
    * @param {Observer<ISession>} observer
    */
-  public oidcLogin(credentials:ICredentials, loginConfig:ILoginConfig_OIDC):Observable<ISession>{
-    debug("[oidcLogin] Doing oidcLogin");
+  public oidcLogin(credentials: ICredentials, loginConfig: ILoginConfig_OIDC): Observable<ISession> {
+    debug('[oidcLogin] Doing oidcLogin');
 
-    let tokenUrl:string = loginConfig.tokenUrl;
+    const tokenUrl: string = loginConfig.tokenUrl;
 
-    let headers:HttpHeaders = new HttpHeaders()
-      .append("Authorization",    loginConfig.accessToken)
-      .append("Content-Type",     loginConfig.contentType);
+    const headers: HttpHeaders = new HttpHeaders()
+      .append('Authorization',    loginConfig.accessToken)
+      .append('Content-Type',     loginConfig.contentType);
 
-    let params:HttpParams = new HttpParams({encoder: new WebHttpUrlEncodingCodec()})
-      .append("grant_type",       loginConfig.grantType)
-      .append("username",         credentials.username)
-      .append("password",         credentials.password)
-      .append("scope",            loginConfig.scope);
+    const params: HttpParams = new HttpParams({encoder: new WebHttpUrlEncodingCodec()})
+      .append('grant_type',       loginConfig.grantType)
+      .append('username',         credentials.username)
+      .append('password',         credentials.password)
+      .append('scope',            loginConfig.scope);
 
 
-    let rs = new ReplaySubject<ISession>();
+    const rs = new ReplaySubject<ISession>();
 
     this.http.post(tokenUrl, params, {headers: headers}).subscribe(
-      (response:IOIDCLoginResponse) => {
+      (response: IOIDCLoginResponse) => {
         // create session object with access_token as token, but also attach
         // the whole response in case it's needed
         rs.next({
@@ -323,7 +324,7 @@ export class UPLoginProvider implements ILoginProvider {
       (error) => {
         // Authentication error
         // TODO: Add typing for errors?
-        if(error.status = 401) {
+        if (error.status = 401) {
           rs.error({reason: ELoginErrors.AUTHENTICATION});
         }
       }
@@ -336,7 +337,7 @@ export class UPLoginProvider implements ILoginProvider {
    * Allows adding custom sso actions from outside
    * @param {IAction} ssoAction
    */
-  public addSSOaction(ssoAction:IAction){
+  public addSSOaction(ssoAction: IAction) {
     this.ssoActions.push(ssoAction);
   }
 
