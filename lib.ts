@@ -1,5 +1,5 @@
 import { HttpParameterCodec } from '@angular/common/http';
-import { ICredentials } from "./interfaces";
+import { ICredentials } from './interfaces';
 
 /**
  * cleans provided username. Puts it to lowercase and removes optional mail suffix.
@@ -8,11 +8,11 @@ import { ICredentials } from "./interfaces";
  * @param {ICredentials} credentials
  * @return {ICredentials} cleaned credentials
  */
-export function cleanCredentials(credentials:ICredentials):ICredentials{
-  let atChar = "@";
+export function cleanCredentials(credentials: ICredentials): ICredentials {
+  const atChar = '@';
 
   // only username needs cleaning, actually
-  let cleanedUsername:string = credentials.username.toLowerCase().substring(
+  const cleanedUsername: string = credentials.username.toLowerCase().substring(
     0,
     credentials.username.includes(atChar)
       ? credentials.username.lastIndexOf(atChar)
@@ -22,7 +22,7 @@ export function cleanCredentials(credentials:ICredentials):ICredentials{
   return {
     username: cleanedUsername,
     password: credentials.password
-  }
+  };
 }
 
 /**
@@ -32,7 +32,7 @@ export function cleanCredentials(credentials:ICredentials):ICredentials{
  * @param {string} subset
  * @returns {boolean}
  */
-export function isSubset(string:string, subset:string) {
+export function isSubset(string: string, subset: string) {
   return string.indexOf(subset) != -1;
 }
 
@@ -55,13 +55,13 @@ export class WebHttpUrlEncodingCodec implements HttpParameterCodec {
  * @param params
  * @returns {string}
  */
-export function constructPluginUrl(pluginUrlBase, params):string {
+export function constructPluginUrl(pluginUrlBase, params): string {
 
-  let parameters = [];
-  for (let key in params) {
+  const parameters = [];
+  for (const key in params) {
     parameters.push(encodeURIComponent(key) + '=' + encodeURIComponent(params[key]));
   }
-  let pluginUrl = `${pluginUrlBase}${pluginUrlBase.slice(-1)=="?" ? "" : "?"}${parameters.join('&')}`;
+  const pluginUrl = `${pluginUrlBase}${pluginUrlBase.slice(-1) == "?" ? '' : '?'}${parameters.join('&')}`;
 
   console.log(`[LoginProvider]: Created pluginUrl: ${pluginUrl}`);
   return pluginUrl;
