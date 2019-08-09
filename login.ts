@@ -76,8 +76,11 @@ export class UPLoginProvider implements ILoginProvider {
           isSubset(event.url, ('http://' + loginRequest.ssoConfig.ssoUrls.tokenUrl));
       },
       action: (event, loginRequest, observer) => {
-        if (isSubset(event.url, loginRequest.ssoConfig.ssoUrls.tokenUrl) ||
-          isSubset(event.url, ('http://' + loginRequest.ssoConfig.ssoUrls.tokenUrl))) {
+        if (
+          event && event.url
+          && isSubset(event.url, loginRequest.ssoConfig.ssoUrls.tokenUrl)
+          || isSubset(event.url, ('http://' + loginRequest.ssoConfig.ssoUrls.tokenUrl))
+        ) {
 
           let token = event.url;
           token = token.replace('http://', '');
@@ -121,7 +124,7 @@ export class UPLoginProvider implements ILoginProvider {
         const testForLoginForm = '$("form#login").length;';
         const length = await loginRequest.ssoConfig.browser.executeScript({ code: testForLoginForm });
 
-        if (length[0] >= 1) {
+        if (length && length[0] >= 1) {
           debug('[ssoLogin] Login form present');
 
           // Create code for executing login in browser
