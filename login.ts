@@ -2,7 +2,7 @@
 import { Injectable } from '@angular/core';
 import { HttpClient, HttpHeaders, HttpParams, HttpErrorResponse } from '@angular/common/http';
 import { Observer, Observable, ReplaySubject } from 'rxjs';
-import { InAppBrowser } from '@ionic-native/in-app-browser/ngx';
+import { InAppBrowser, InAppBrowserEvent } from '@ionic-native/in-app-browser/ngx';
 
 /* Imports from this module (in same directory) */
 import {
