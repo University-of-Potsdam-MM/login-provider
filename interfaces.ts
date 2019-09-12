@@ -53,6 +53,10 @@ export interface ICredentials {
 /** Interface for the session to be saved in storage */
 export interface ISession {
   token: string;
+  courseID?: string;
+  courseName?: string;
+  courseFac?: string;
+  hexColor?: string;
   credentials?: ICredentials;
   oidcTokenObject?: IOIDCLoginResponse;
 }
