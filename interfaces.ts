@@ -57,6 +57,7 @@ export interface ISession {
   courseName?: string;
   courseFac?: string;
   hexColor?: string;
+  isHidden?: boolean;
   credentials?: ICredentials;
   oidcTokenObject?: IOIDCLoginResponse;
 }
