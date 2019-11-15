@@ -65,10 +65,16 @@ export interface ICredentials {
 
 /** Interface for the session to be saved in storage */
 export interface ISession {
-  credentials: ICredentials;
   token: string;
+  credentials?: ICredentials;
   timestamp?: Date;
   oidcTokenObject?: IOIDCLoginResponse;
+  // Reflect.UP v7+
+  courseID?: string;
+  courseName?: string;
+  courseFac?: string;
+  hexColor?: string;
+  isHidden?: boolean;
 }
 
 export interface IOIDCRefreshResponseObject {
@@ -101,27 +107,30 @@ export interface IPluginUrlParams {
   passport: string;
 }
 
+export interface AccessToken {
+  accessToken: string;
+}
 
 /* Credentials */
 // tslint:disable-next-line: class-name
 export interface ILoginConfig_Credentials {
   moodleLoginEndpoint: string;
-  accessToken: string;
-  service: string;
   moodlewsrestformat: string;
+  service: string;
+  authHeader: AccessToken;
 }
 
 /* OIDC */
 // tslint:disable-next-line: class-name
 export interface ILoginConfig_OIDC {
   tokenUrl: string;
-  userInformationUrl: string;
   accessToken: string;
   contentType: string;
-  grantType_password: string;
-  grantType_refresh: string;
   scope: string;
-  userInfoParams: IUserInfoParams;
+  grantType_password: string;
+  grantType_refresh?: string;
+  userInfoParams?: IUserInfoParams;
+  userInformationUrl?: string;  
 }
 
 export interface IUserInfoParams {

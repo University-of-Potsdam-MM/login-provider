@@ -2,9 +2,7 @@
 import { Injectable } from '@angular/core';
 import { InAppBrowser, InAppBrowserEvent } from '@ionic-native/in-app-browser/ngx';
 import { HttpClient, HttpHeaders, HttpParams, HttpErrorResponse } from '@angular/common/http';
-import { Observable } from 'rxjs/Observable';
-import { Observer } from 'rxjs/Observer';
-import { ReplaySubject } from 'rxjs/ReplaySubject';
+import { Observer, Observable, ReplaySubject } from 'rxjs';
 
 /* Imports from this module (in same directory) */
 import {
@@ -81,7 +79,6 @@ export class UPLoginProvider implements ILoginProvider {
           && isSubset(event.url, loginRequest.ssoConfig.ssoUrls.tokenUrl)
           || isSubset(event.url, ('http://' + loginRequest.ssoConfig.ssoUrls.tokenUrl))
         ) {
-
           let token = event.url;
           token = token.replace('http://', '');
           token = token.replace(loginRequest.ssoConfig.ssoUrls.tokenUrl, '');
@@ -268,7 +265,7 @@ export class UPLoginProvider implements ILoginProvider {
     const url: string = loginConfig.moodleLoginEndpoint;
 
     const headers: HttpHeaders = new HttpHeaders()
-      .append('Authorization',       loginConfig.accessToken);
+      .append('Authorization',       loginConfig.authHeader.accessToken);
 
     const params: HttpParams = new HttpParams({encoder: new WebHttpUrlEncodingCodec()})
       .append('username',           credentials.username)
@@ -282,7 +279,6 @@ export class UPLoginProvider implements ILoginProvider {
       (response: ICredentialsLoginResponse) => {
         if (response.token) {
           rs.next({
-            credentials:  credentials,
             token:        response.token,
             timestamp:    new Date()
           });
@@ -328,7 +324,6 @@ export class UPLoginProvider implements ILoginProvider {
         // create session object with access_token as token, but also attach
         // the whole response in case it's needed
         rs.next({
-          credentials:      credentials,
           token:            response.access_token,
           oidcTokenObject:  response,
           timestamp:        new Date()
