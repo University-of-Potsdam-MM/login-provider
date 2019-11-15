@@ -8,7 +8,7 @@ export interface ILoginProvider {
 
 /** Errors that will be used by LoginProvider */
 export enum ELoginErrors {
-  AUTHENTICATION, TECHNICAL, NETWORK, UNKNOWN_METHOD, UNKNOWN_ERROR
+  AUTHENTICATION, TECHNICAL, NETWORK, UNKNOWN_METHOD, UNKNOWN_ERROR, TIMEOUT
 }
 
 /** Defines a LoginRequest that is given to each login method */
