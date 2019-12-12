@@ -285,12 +285,17 @@ export class UPLoginProvider implements ILoginProvider {
           });
           rs.complete();
         } else {
-          rs.error({reason: ELoginErrors.AUTHENTICATION});
+          rs.error({reason: ELoginErrors.UNKNOWN_ERROR});
         }
       },
       (error: HttpErrorResponse) => {
         // some other error
-        rs.error({reason: ELoginErrors.UNKNOWN_ERROR, error: error});
+        if (error && error.error &&
+        error.error.error === 'invalid_grant') {
+          rs.error({reason: ELoginErrors.AUTHENTICATION});
+        } else {
+          rs.error({reason: ELoginErrors.NETWORK});
+        }
       }
     );
 
@@ -335,8 +340,11 @@ export class UPLoginProvider implements ILoginProvider {
       (error) => {
         // Authentication error
         // TODO: Add typing for errors?
-        if (error.status = 401) {
+        if (error && error.error &&
+        error.error.error === 'invalid_grant') {
           rs.error({reason: ELoginErrors.AUTHENTICATION});
+        } else {
+          rs.error({reason: ELoginErrors.NETWORK});
         }
       }
     );
@@ -379,7 +387,8 @@ export class UPLoginProvider implements ILoginProvider {
       (response) => {
         console.log(response);
         // Authentication error
-        if (response.status = 401) {
+        if (response && response.error &&
+        response.error.error === 'invalid_grant') {
           let errorDescription, error;
           if (response.error && response.error.error_description && response.error.error) {
             errorDescription = response.error.error_description;
@@ -387,6 +396,8 @@ export class UPLoginProvider implements ILoginProvider {
           }
 
           rs.error({ reason: ELoginErrors.AUTHENTICATION, error: error, description: errorDescription });
+        } else {
+          rs.error({reason: ELoginErrors.NETWORK});
         }
       }
     );
@@ -418,8 +429,11 @@ export class UPLoginProvider implements ILoginProvider {
       error => {
         console.log(error);
         // Authentication error
-        if (error.status = 401) {
+        if (error && error.error &&
+        error.error.error === 'invalid_grant') {
           rs.error({reason: ELoginErrors.AUTHENTICATION});
+        } else {
+          rs.error({reason: ELoginErrors.NETWORK});
         }
       }
     );
