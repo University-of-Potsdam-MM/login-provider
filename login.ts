@@ -102,8 +102,17 @@ export class UPLoginProvider implements ILoginProvider {
             observer.complete();
           } catch (error) {
             // TODO: check what caused the error
-            observer.error({reason: ELoginErrors.TECHNICAL, error: error});
+            observer.error({
+              reason: ELoginErrors.TECHNICAL,
+              description: 'Error processing the token',
+              error: error
+            });
           }
+        } else {
+          observer.error({
+            reason: ELoginErrors.UNKNOWN_ERROR,
+            description: 'ssoBrowserEvents.loadStart condition failed'
+          });
         }
       }
     },
@@ -114,7 +123,7 @@ export class UPLoginProvider implements ILoginProvider {
         return isSubset(event.url, loginRequest.ssoConfig.ssoUrls.idpBaseUrl) &&
           !loginRequest.loginAttemptStarted;
       },
-      action: async (event, loginRequest, subject) => {
+      action: async (event, loginRequest, observer) => {
         debug('[ssoLogin] Testing for login form');
 
         // Test for a login form
@@ -133,16 +142,38 @@ export class UPLoginProvider implements ILoginProvider {
           loginRequest.loginAttemptStarted = true;
 
           debug('[ssoLogin] Injecting login code now');
-          loginRequest.ssoConfig.browser.executeScript({code: enterCredentials});
+          loginRequest.ssoConfig.browser.executeScript({code: enterCredentials}).then(() => {
+            setTimeout(async () => {
+              const testForErrorMessage = '$(".form-error").length;';
+              const lengthError = await loginRequest.ssoConfig.browser.executeScript({ code: testForErrorMessage });
+
+               if (lengthError[0] >= 1) {
+                debug('[ssoLogin] login error after executing script');
+                observer.error({
+                  reason: ELoginErrors.AUTHENTICATION,
+                  description: 'Authentication failed, credentials probably wrong'
+                });
+              }
+            }, 3000);
+          }, error => {
+            debug('[ssoLogin] executing script failed: ' + error);
+            observer.error({
+              reason: ELoginErrors.TECHNICAL,
+              description: 'Script execution failed',
+              error: error
+            });
+          });
         }
       }
     },
     {
-      //
       event: this.ssoBrowserEvents.loadError,
       condition: (event, loginRequest) => true,
       action: (event, loginRequest, observer) => {
-        // TODO: something should be done here, I guess
+        observer.error({
+          reason: ELoginErrors.NETWORK,
+          description: 'Failed to load website'
+        });
       }
     },
     {
@@ -227,6 +258,15 @@ export class UPLoginProvider implements ILoginProvider {
             );
           }
         }
+
+        // timeout login attempt after 30 seconds
+        setTimeout(() => {
+          observer.error({
+            reason: ELoginErrors.TIMEOUT,
+            description: 'Login attempt timed out after 30 seconds'
+          });
+        }, 30000);
+
       }
     ).subscribe(
       session => {
@@ -285,16 +325,21 @@ export class UPLoginProvider implements ILoginProvider {
           });
           rs.complete();
         } else {
-          rs.error({reason: ELoginErrors.UNKNOWN_ERROR});
+          rs.error({
+            reason: ELoginErrors.AUTHENTICATION,
+            description: 'credentialsLogin returned no token'
+          });
         }
       },
       (error: HttpErrorResponse) => {
-        // some other error
-        if (error && error.error &&
-        error.error.error === 'invalid_grant') {
-          rs.error({reason: ELoginErrors.AUTHENTICATION});
+        if (
+          error
+          && error.error
+          && error.error.error === 'invalid_grant'
+        ) {
+          rs.error({ reason: ELoginErrors.AUTHENTICATION, error: error });
         } else {
-          rs.error({reason: ELoginErrors.NETWORK});
+          rs.error({ reason: ELoginErrors.NETWORK, error: error });
         }
       }
     );
@@ -340,11 +385,22 @@ export class UPLoginProvider implements ILoginProvider {
       (error) => {
         // Authentication error
         // TODO: Add typing for errors?
-        if (error && error.error &&
-        error.error.error === 'invalid_grant') {
-          rs.error({reason: ELoginErrors.AUTHENTICATION});
+        if (
+          (error
+          && error.error
+          && error.error.error === 'invalid_grant')
+          || error.status === 401
+        ) {
+          rs.error({
+            reason: ELoginErrors.AUTHENTICATION,
+            description: 'oidc authentication error',
+            error: error
+          });
         } else {
-          rs.error({reason: ELoginErrors.NETWORK});
+          rs.error({
+            reason: ELoginErrors.NETWORK,
+            error: error
+          });
         }
       }
     );
