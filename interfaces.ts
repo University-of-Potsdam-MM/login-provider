@@ -1,5 +1,5 @@
 import { InAppBrowserEvent, InAppBrowserObject } from '@ionic-native/in-app-browser/ngx';
-import { Observer } from 'rxjs/Observer';
+import { Observer } from 'rxjs';
 
 /** Defines a LoginProvider, not that much right now, but can't hurt */
 // tslint:disable-next-line: no-empty-interface
