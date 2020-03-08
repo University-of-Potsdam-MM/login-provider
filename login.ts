@@ -69,10 +69,8 @@ export class UPLoginProvider implements ILoginProvider {
     {
       // obtains token from URL
       event: this.ssoBrowserEvents.loadStart,
-      condition: (event, loginRequest) => {
-        return isSubset(event.url, loginRequest.ssoConfig.ssoUrls.tokenUrl) ||
-          isSubset(event.url, ('http://' + loginRequest.ssoConfig.ssoUrls.tokenUrl));
-      },
+      condition: (event, loginRequest) => isSubset(event.url, loginRequest.ssoConfig.ssoUrls.tokenUrl) ||
+          isSubset(event.url, ('http://' + loginRequest.ssoConfig.ssoUrls.tokenUrl)),
       action: (event, loginRequest, observer) => {
         if (
           event && event.url
@@ -119,10 +117,8 @@ export class UPLoginProvider implements ILoginProvider {
     {
       // checks whether a login form is present and then injects code for login
       event: this.ssoBrowserEvents.loadStop,
-      condition: (event, loginRequest) => {
-        return isSubset(event.url, loginRequest.ssoConfig.ssoUrls.idpBaseUrl) &&
-          !loginRequest.loginAttemptStarted;
-      },
+      condition: (event, loginRequest) => isSubset(event.url, loginRequest.ssoConfig.ssoUrls.idpBaseUrl) &&
+          !loginRequest.loginAttemptStarted,
       action: async (event, loginRequest, observer) => {
         debug('[ssoLogin] Testing for login form');
 
@@ -135,8 +131,8 @@ export class UPLoginProvider implements ILoginProvider {
 
           // Create code for executing login in browser
           const enterCredentials =
-            `$("form#login #username").val(\'${loginRequest.credentials.username}\');
-             $("form#login #password").val(\'${loginRequest.credentials.password}\');
+            `$("form#login #username").val('${loginRequest.credentials.username}');
+             $("form#login #password").val('${loginRequest.credentials.password}');
              $("form#login .loginbutton").click();`;
 
           loginRequest.loginAttemptStarted = true;
@@ -168,7 +164,7 @@ export class UPLoginProvider implements ILoginProvider {
     },
     {
       event: this.ssoBrowserEvents.loadError,
-      condition: (event, loginRequest) => true,
+      condition: () => true,
       action: (event, loginRequest, observer) => {
         observer.error({
           reason: ELoginErrors.NETWORK,

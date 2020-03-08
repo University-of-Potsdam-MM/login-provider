@@ -1,8 +1,9 @@
+/* eslint-disable @typescript-eslint/class-name-casing */
+/* eslint-disable @typescript-eslint/no-empty-interface */
 import { InAppBrowserEvent, InAppBrowserObject } from '@ionic-native/in-app-browser/ngx';
 import { Observer } from 'rxjs';
 
 /** Defines a LoginProvider, not that much right now, but can't hurt */
-// tslint:disable-next-line: no-empty-interface
 export interface ILoginProvider {
 
 }
@@ -85,7 +86,6 @@ export interface IOIDCRefreshResponseObject {
 /* ~~~ config ~~~ */
 
 /* SSO */
-// tslint:disable-next-line: class-name
 export interface ILoginConfig_SSO {
   browser: InAppBrowserObject;
   method: string;
@@ -112,7 +112,6 @@ export interface AccessToken {
 }
 
 /* Credentials */
-// tslint:disable-next-line: class-name
 export interface ILoginConfig_Credentials {
   moodleLoginEndpoint: string;
   moodlewsrestformat: string;
@@ -121,7 +120,6 @@ export interface ILoginConfig_Credentials {
 }
 
 /* OIDC */
-// tslint:disable-next-line: class-name
 export interface ILoginConfig_OIDC {
   tokenUrl: string;
   accessToken: string;
