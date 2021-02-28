@@ -1,5 +1,5 @@
-import { HttpParameterCodec } from '@angular/common/http';
-import { ICredentials } from './interfaces';
+import { HttpParameterCodec } from "@angular/common/http";
+import { ICredentials } from "./interfaces";
 
 /**
  * cleans provided username. Puts it to lowercase and removes optional mail suffix.
@@ -9,19 +9,21 @@ import { ICredentials } from './interfaces';
  * @return {ICredentials} cleaned credentials
  */
 export function cleanCredentials(credentials: ICredentials): ICredentials {
-  const atChar = '@';
+  const atChar = "@";
 
   // only username needs cleaning, actually
-  const cleanedUsername: string = credentials.username.toLowerCase().substring(
-    0,
-    credentials.username.includes(atChar)
-      ? credentials.username.lastIndexOf(atChar)
-      : credentials.username.length
-  );
+  const cleanedUsername: string = credentials.username
+    .toLowerCase()
+    .substring(
+      0,
+      credentials.username.includes(atChar)
+        ? credentials.username.lastIndexOf(atChar)
+        : credentials.username.length
+    );
 
   return {
     username: cleanedUsername,
-    password: credentials.password
+    password: credentials.password,
   };
 }
 
@@ -43,10 +45,18 @@ export function isSubset(string: string, subset: string) {
  * see https://github.com/angular/angular/issues/11058
  */
 export class WebHttpUrlEncodingCodec implements HttpParameterCodec {
-  encodeKey(k: string): string { return encodeURIComponent(k); }
-  encodeValue(v: string): string { return encodeURIComponent(v); }
-  decodeKey(k: string): string { return decodeURIComponent(k); }
-  decodeValue(v: string) { return decodeURIComponent(v); }
+  encodeKey(k: string): string {
+    return encodeURIComponent(k);
+  }
+  encodeValue(v: string): string {
+    return encodeURIComponent(v);
+  }
+  decodeKey(k: string): string {
+    return decodeURIComponent(k);
+  }
+  decodeValue(v: string) {
+    return decodeURIComponent(v);
+  }
 }
 
 /**
@@ -56,14 +66,17 @@ export class WebHttpUrlEncodingCodec implements HttpParameterCodec {
  * @returns {string}
  */
 export function constructPluginUrl(pluginUrlBase, params): string {
-
   const parameters = [];
   for (const key in params) {
     if (key) {
-      parameters.push(encodeURIComponent(key) + '=' + encodeURIComponent(params[key]));
+      parameters.push(
+        encodeURIComponent(key) + "=" + encodeURIComponent(params[key])
+      );
     }
   }
-  const pluginUrl = `${pluginUrlBase}${pluginUrlBase.slice(-1) === '?' ? '' : '?'}${parameters.join('&')}`;
+  const pluginUrl = `${pluginUrlBase}${
+    pluginUrlBase.slice(-1) === "?" ? "" : "?"
+  }${parameters.join("&")}`;
 
   console.log(`[LoginProvider]: Created pluginUrl: ${pluginUrl}`);
   return pluginUrl;

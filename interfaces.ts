@@ -1,16 +1,22 @@
 /* eslint-disable @typescript-eslint/class-name-casing */
 /* eslint-disable @typescript-eslint/no-empty-interface */
-import { InAppBrowserEvent, InAppBrowserObject } from '@ionic-native/in-app-browser/ngx';
-import { Observer } from 'rxjs';
+import {
+  InAppBrowserEvent,
+  InAppBrowserObject,
+} from "@ionic-native/in-app-browser/ngx";
+import { Observer } from "rxjs";
 
 /** Defines a LoginProvider, not that much right now, but can't hurt */
-export interface ILoginProvider {
-
-}
+export interface ILoginProvider {}
 
 /** Errors that will be used by LoginProvider */
 export enum ELoginErrors {
-  AUTHENTICATION, TECHNICAL, NETWORK, UNKNOWN_METHOD, UNKNOWN_ERROR, TIMEOUT
+  AUTHENTICATION,
+  TECHNICAL,
+  NETWORK,
+  UNKNOWN_METHOD,
+  UNKNOWN_ERROR,
+  TIMEOUT,
 }
 
 /** Defines a LoginRequest that is given to each login method */
@@ -28,7 +34,11 @@ export interface ILoginRequest {
 export interface IAction {
   event: string;
   condition(event: InAppBrowserEvent, loginRequest: ILoginRequest): boolean;
-  action(event: InAppBrowserEvent, loginRequest: ILoginRequest, observer: Observer<ISession>): void;
+  action(
+    event: InAppBrowserEvent,
+    loginRequest: ILoginRequest,
+    observer: Observer<ISession>
+  ): void;
 }
 
 /** Server response for ordinary credentials login */
@@ -46,7 +56,6 @@ export interface IOIDCLoginResponse {
   expires_in: number;
 }
 
-
 /** Server response for OIDC user information */
 export interface IOIDCUserInformationResponse {
   sub: string;
@@ -55,8 +64,6 @@ export interface IOIDCUserInformationResponse {
   family_name: string;
   email: string;
 }
-
-
 
 /** Credentials used for logging in */
 export interface ICredentials {
@@ -134,4 +141,3 @@ export interface ILoginConfig_OIDC {
 export interface IUserInfoParams {
   schema: string;
 }
-
