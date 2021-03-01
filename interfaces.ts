@@ -4,9 +4,6 @@ import {
 } from "@ionic-native/in-app-browser/ngx";
 import { Observer } from "rxjs";
 
-/** Defines a LoginProvider, not that much right now, but can't hurt */
-export interface ILoginProvider {}
-
 /** Errors that will be used by LoginProvider */
 export enum ELoginErrors {
   AUTHENTICATION,

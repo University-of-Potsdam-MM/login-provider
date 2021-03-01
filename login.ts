@@ -14,7 +14,6 @@ import { Observer, Observable, ReplaySubject } from "rxjs";
 
 /* Imports from this module (in same directory) */
 import {
-  ILoginProvider,
   ICredentialsLoginResponse,
   ISession,
   ICredentials,
@@ -58,7 +57,7 @@ export function debug(text) {
  * created session (or an error).
  */
 @Injectable()
-export class UPLoginProvider implements ILoginProvider {
+export class UPLoginProvider {
   // events that can occur in InAppBrowser during SSO login
   private ssoBrowserEvents = {
     loadStart: "loadstart",
