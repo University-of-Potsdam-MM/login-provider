@@ -1,5 +1,3 @@
-/* eslint-disable @typescript-eslint/class-name-casing */
-/* eslint-disable @typescript-eslint/no-empty-interface */
 import {
   InAppBrowserEvent,
   InAppBrowserObject,
